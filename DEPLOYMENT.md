@@ -9,7 +9,7 @@ This guide outlines how to deploy the AutoRoot platform using **free-tier** serv
 | Component | Recommended Provider | Why? |
 |-----------|----------------------|------|
 | **PostgreSQL** | [Neon.tech](https://neon.tech) | Excellent serverless Postgres with a generous free tier. |
-| **Kafka** | [Upstash](https://upstash.com) | Serverless Kafka with zero management and a solid free tier. |
+| **Kafka** | [Redpanda](https://redpanda.com) | Truly free 14-day trial, no credit card, public CA support. |
 | **Backend Services** | [Railway](https://railway.app) | Easiest for Docker-based microservices. |
 | **Frontend** | [Vercel](https://vercel.com) | Native Next.js support, lightning fast. |
 | **Object Storage** | [Supabase Storage](https://supabase.com) | S3-compatible and very easy to set up. |
@@ -23,10 +23,12 @@ This guide outlines how to deploy the AutoRoot platform using **free-tier** serv
 2. Copy the **Connection String** (Postgres URL).
 3. Ensure you have the `tenant_id` and other tables initialized (Railway/Docker will do this via JPA DDL-Auto).
 
-### 🎡 Message Queue (Upstash Kafka)
-1. Create a Kafka cluster on [Upstash](https://upstash.com).
-2. Create a topic named `autoroot.logs`.
-3. Copy the `BOOTSTRAP_SERVER`, `SASL_USERNAME`, and `SASL_PASSWORD`.
+### 🎡 Message Queue (Redpanda Serverless)
+1. Create a Serverless cluster on [Redpanda](https://redpanda.com).
+2. Copy the **Bootstrap Server**, **Username**, and **Password**.
+   - **Host**: `d6i66humqido6iapvtc0.any.ap-south-1.mpx.prd.cloud.redpanda.com:9092`
+   - **User**: `autoroot_user`
+   - **Pass**: `D51yyCHRMmgSW8af26mAwh5GZR1W2T`
 
 ---
 
@@ -42,10 +44,12 @@ Railway allows you to deploy directly from your GitHub repository using the `Doc
 | Variable | Value |
 |----------|-------|
 | `SPRING_PROFILES_ACTIVE` | `prod` |
-| `POSTGRES_HOST` | `<your-neon-host>` |
-| `POSTGRES_USER` | `<your-neon-user>` |
-| `POSTGRES_PASSWORD` | `<your-neon-password>` |
-| `KAFKA_BOOTSTRAP_SERVERS` | `<your-upstash-server>` |
+| `POSTGRES_HOST` | `ep-rapid-feather-aixixne9-pooler.c-4.us-east-1.aws.neon.tech` |
+| `POSTGRES_USER` | `neondb_owner` |
+| `POSTGRES_PASSWORD` | `npg_T4sOeyPwQZc1` |
+| `KAFKA_BOOTSTRAP_SERVERS` | `d6i66humqido6iapvtc0.any.ap-south-1.mpx.prd.cloud.redpanda.com:9092` |
+| `KAFKA_USERNAME` | `autoroot_user` |
+| `KAFKA_PASSWORD` | `D51yyCHRMmgSW8af26mAwh5GZR1W2T` |
 | `OPENAI_API_KEY` | `sk-xxxxx` |
 
 ---

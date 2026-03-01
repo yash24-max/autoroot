@@ -20,8 +20,7 @@ COPY backend/autoroot-deployment-analyzer/pom.xml backend/autoroot-deployment-an
 RUN mvn dependency:go-offline -B
 
 # Copy source code
-COPY backend/autoroot-common backend/autoroot-common
-COPY backend/autoroot-api-gateway backend/autoroot-api-gateway
+COPY backend backend
 
 # Build the specific module
 ARG MODULE_NAME
@@ -34,5 +33,5 @@ WORKDIR /app
 ARG MODULE_NAME
 COPY --from=build /app/backend/autoroot-correlation-engine/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8082
 ENTRYPOINT ["java", "-jar", "app.jar"]

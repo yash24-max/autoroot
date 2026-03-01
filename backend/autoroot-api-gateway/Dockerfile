@@ -20,8 +20,7 @@ COPY backend/autoroot-deployment-analyzer/pom.xml backend/autoroot-deployment-an
 RUN mvn dependency:go-offline -B
 
 # Copy source code
-COPY backend/autoroot-common backend/autoroot-common
-COPY backend/autoroot-api-gateway backend/autoroot-api-gateway
+COPY backend backend
 
 # Build the specific module
 ARG MODULE_NAME
