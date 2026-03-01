@@ -1,0 +1,104 @@
+# Docker Compose Override File for Development
+# This file is automatically loaded by docker-compose and provides development-specific configurations
+
+version: '3.8'
+
+services:
+  # PostgreSQL with development optimizations
+  postgres:
+    environment:
+      # Enable verbose logging in development
+      POSTGRES_LOG_STATEMENT: all
+      POSTGRES_LOG_MIN_DURATION_STATEMENT: 0
+    volumes:
+      # Mount custom configuration for development
+      - ./infrastructure/postgres/postgres.conf:/etc/postgresql/postgresql.conf:ro
+      - ./infrastructure/postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command: >
+      postgres 
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c hba_file=/etc/postgresql/pg_hba.conf
+      -c log_statement=all
+      -c log_min_duration_statement=0
+
+  # Redis with development configuration
+  redis:
+    volumes:
+      # Persist Redis data in development
+      - redis_dev_data:/data
+    command: >
+      redis-server 
+      --requirepass ${REDIS_PASSWORD:-redis_dev_password}
+      --appendonly yes
+      --appendfsync everysec
+      --save 60 1000
+
+  # Kafka with development-friendly settings
+  kafka:
+    environment:
+      # Additional development settings
+      KAFKA_LOG_RETENTION_HOURS: 24
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+
+  # MinIO with development settings
+  minio:
+    environment:
+      # Enable browser access in development
+      MINIO_BROWSER: "on"
+    volumes:
+      # Use a named volume for development data persistence
+      - minio_dev_data:/data
+
+  # Development-only services
+  # These services are only started with --profile dev
+
+  # pgAdmin for database management
+  pgadmin:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Persist pgAdmin settings
+      - pgadmin_dev_data:/var/lib/pgadmin
+      # Pre-configure server connections
+      - ./infrastructure/pgadmin/servers.json:/pgadmin4/servers.json:ro
+
+  # Kafka UI for Kafka management
+  kafka-ui:
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      # Additional UI configuration
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRY: ""
+      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: local
+      DYNAMIC_CONFIG_ENABLED: 'true'
+
+  # Redis Commander (optional Redis UI)
+  redis-commander:
+    image: ghcr.io/joeferner/redis-commander:latest
+    container_name: autoroot-redis-commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:${REDIS_PASSWORD:-redis_dev_password}
+    ports:
+      - "8081:8081"
+    networks:
+      - autoroot-network
+    profiles:
+      - dev
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis_dev_data:
+    driver: local
+  minio_dev_data:
+    driver: local
+  pgadmin_dev_data:
+    driver: local
